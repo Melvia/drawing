@@ -1,31 +1,16 @@
 
 let hsl = (h, s, l) => `hsl(${h},${s}%,${l}%)`
 
-let drawCoords = (ctx, x, y, color = "green") => {
-    ctx.save()
-    ctx.translate(x, y)
-    ctx.fillStyle = color
-    ctx.fillRect(-45, -7, 30, 14)
-    ctx.fillStyle = 'white'
-    ctx.fillText(Math.floor(x), -30, 0)
-    ctx.rotate(Math.PI / 2)
-    ctx.fillStyle = color
-    ctx.fillRect(-45, -7, 30, 14)
-    ctx.fillStyle = 'white'
-    ctx.fillText(Math.floor(y), -30, 0)
-    ctx.restore()
-}
 
-
-let canvas = document.getElementById('mycanvas')
-let canvas2 = document.getElementById('mycanvas2')
+let canvas = document.getElementById('canvas')
 let ctx = canvas.getContext('2d')
-let ctx2 = canvas2.getContext('2d')
-let w = canvas.width = canvas2.width = window.innerWidth * 0.9;
-let h = canvas.height = canvas2.height = window.innerHeight * 0.9;
 
-canvas.style.backgroundColor = 'transparent'
-canvas2.style.backgroundColor = 'yellow'
+// let w = canvas.width = canvas2.width = window.innerWidth * 0.9;
+// let h = canvas.height = canvas2.height = window.innerHeight * 0.9;
+ let w = canvas.width;
+ let h = canvas.height;
+
+canvas.style.backgroundColor = 'white'
 
 ctx.lineWidth = 2
 ctx.textAlign = 'center'
@@ -33,112 +18,24 @@ ctx.textBaseline = 'middle'
 ctx.font = '10px Arial'
 
 
-let drawBG = context => {
 
-    context.save()
-
-    context.fillStyle = 'white'
-    context.fillRect(0, 0, w, h)
-    context.lineWidth = 0.3;
-    context.strokeStyle = 'lightgray'
-    context.fillStyle = 'black'
-
-    for (let i = 1; i < w; i++) {
-        context.beginPath()
-        if (i % 10 === 0) {
-            context.moveTo(i, 0);
-            context.lineTo(i, h)
-            context.moveTo(i, 0);
-        }
-        context.closePath()
-        context.stroke()
-    }
-
-    for (let i = 1; i < h; i++) {
-        context.beginPath()
-        if (i % 10 === 0) {
-            context.moveTo(0, i)
-            context.lineTo(w, i)
-            context.moveTo(0, i)
-        }
-        context.closePath()
-        context.stroke()
-    }
-
-
-    context.lineWidth = 1
-    context.strokeStyle = 'gray'
-
-    context.beginPath()
-    for (let i = 50; i < w; i += 10) {
-        if (i % 50 === 0) {
-            context.moveTo(i, 0)
-            context.lineTo(i, 30)
-            context.fillText(` ${i}`, i, 30)
-        } else {
-            context.moveTo(i, 0)
-            context.lineTo(i, 10)
-        }
-
-    }
-    context.closePath()
-    context.stroke()
-
-    context.beginPath()
-    for (let i = 50; i < h; i += 10) {
-        if (i % 50 === 0) {
-            context.moveTo(0, i)
-            context.lineTo(30, i)
-            context.fillText(` ${i}`, 30, i)
-        } else {
-            context.moveTo(0, i)
-            context.lineTo(10, i)
-        }
-
-    }
-    context.closePath()
-    context.stroke()
-
-    context.restore()
-}
-
-//drawBG(ctx2)
 
 class Square {
     constructor(x, y, edge, color) {
-
         this.x = x
         this.y = y
         this.edge = edge
         this.color = color
         this.selected = false
         this.active = false
-        this.activeColor = color.replace(/,\d\d%\)/, str => str.replace(/\d\d/, str.match(/\d\d/)[0] * 0.7))
 
         this.activeColor2 = color.replace(/,\d\d%\)/, str => str.replace(/\d\d/, str.match(/\d\d/)[0] * 0.6))
 
     }
-    draw(context) {
+
+     draw(context) {
         context.fillStyle = this.color
-        if (this.active) {
-            context.fillStyle = this.activeColor;
-            context.save()
-            context.setLineDash([10, 5, 30, 5])
-            context.beginPath()
-            context.moveTo(this.x, this.y)
-            context.lineTo(0, this.y)
-            context.moveTo(this.x, this.y)
-            context.lineTo(this.x, 0)
-            context.moveTo(this.x, this.y)
-            context.closePath()
-            context.lineWidth = 0.5
-            context.strokeStyle = this.activeColor
-            context.stroke()
 
-            drawCoords(context, this.x, this.y, this.activeColor)
-
-            context.restore()
-        }
         context.fillRect(this.x, this.y, this.edge, this.edge)
         if (this.selected) {
             context.lineWidth = 2;
@@ -159,18 +56,23 @@ class Square {
     }
 }
 
-//let prtcls = new Array(10).fill().map(() => new Square(Math.random() * w, Math.random() * h, 60, hsl(Math.floor(Math.random() * 360), 100, 50)))
+//console.log()
+let prtcls = new Array(5).fill().map(() => new Square(Math.random() * w, Math.random() * h, 60, hsl(160, 100, 50)))
 
 
 let getMouseCoords = (canvas, event) => {
     let canvasCoords = canvas.getBoundingClientRect()
     return {
-        x: event.pageX - canvasCoords.left,
-        y: event.pageY - canvasCoords.top
+        // x: event.pageX - canvasCoords.left,
+        // y: event.pageY - canvasCoords.top
+
+        x: event.offsetX - canvasCoords.left,
+        y: event.offsetY - canvasCoords.top
     }
 }
 
 let getOffsetCoords = (mouse, rect) => {
+   // console.log("getOffsetCoords", mouse.x, mouse.y);
     return {
         x: mouse.x - rect.x,
         y: mouse.y - rect.y
@@ -195,17 +97,6 @@ let cursorInRect = (mouseX, mouseY, rectX, rectY, rectW, rectH) => {
 // =============================================================
 //                          HANDLERS
 // =============================================================
-const showGrid = () => {
-    drawBG(ctx2);
-}
-
-
-
-window.addEventListener('resize', () => {
-    w = canvas.width = canvas2.width = window.innerWidth * 0.7;
-    h = canvas.height = canvas2.height = window.innerHeight * 0.7;
-    drawBG(ctx2)
-})
 
 canvas.addEventListener('click', e => {
     let mouse = getMouseCoords(canvas, e)
@@ -257,11 +148,13 @@ canvas.addEventListener('mouseup', e => {
 // =============================================================
 
 function animate() {
-    ctx.clearRect(0, 0, w, ctx.canvas.height)
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = 'white'
+    console.log("prtcls", prtcls);
     prtcls.forEach(e => {
         e.draw(ctx)
     })
+
     window.requestAnimationFrame(animate)
 }
 
